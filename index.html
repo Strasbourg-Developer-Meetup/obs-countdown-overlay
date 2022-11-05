@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Obs Countdown Overlay</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600;1,700;1,900&display=swap" rel="stylesheet">
+        <style>
+            body { 
+                margin: 0; 
+                font-family: 'Source Sans Pro', sans-serif;
+                font-size: 40px;
+            }
+            h3 {
+                font-weight: 400;
+            }
+            h1 {
+                font-weight: 900;
+            }
+            main { 
+                width: 100vw; 
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <h3>[DEFAULT TITLE]</h3>
+            <h1>[DEFAULT TIMER]</h1>
+        </main>
+        <script>
+
+            const formatMilliseconds = (milliseconds) => {
+                const seconds = Math.floor((milliseconds / 1000) % 60);
+                const minutes = Math.floor(((milliseconds / (1000*60)) % 60));
+                const hours   = Math.floor(((milliseconds / (1000*60*60)) % 24));
+
+                const hoursStr = hours <= 0 ? '' : hours < 10 ? '0' + hours + ':' : hours + ':';
+                return `${hoursStr}${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+            }
+
+            let durationInMilliseconds;
+            let countDownElement;
+            const countDown = (elapsed) => {
+                if(Math.round(elapsed) % 2 === 0) {
+                    const currentCountDown = durationInMilliseconds - elapsed;
+                    if(currentCountDown < 0) {
+                        return;
+                    }
+                    countDownElement.textContent = formatMilliseconds(currentCountDown);
+                }
+
+                window.requestAnimationFrame(countDown);
+            }
+
+            const getCountDownDurationInSeconds = (rawUrl) => {
+                const url = new URL(rawUrl);
+                return Number(url.searchParams.get('s_duration'));
+            }
+
+            const getTitle = (rawUrl) => {
+                const url = new URL(rawUrl);
+                return url.searchParams.get('title');
+            }
+
+            const run = () => {
+                countDownElement = document.querySelector('main > h1');
+                const titleElement = document.querySelector('main > h3');
+                const duration = getCountDownDurationInSeconds(location.href);
+                const title = getTitle(location.href);
+                if(typeof duration !== 'number') {
+                    throw new Error('Expected to have a duration of type number')
+                }
+                if(!duration < 0) {
+                    throw new Error('Expected duration to be superior or equal to 0')
+                }
+                if(!title) {
+                    throw new Error('Expected title found nothing')
+                }
+                titleElement.textContent = title;
+                durationInMilliseconds = duration * 1000;
+                countDown(0);
+            }
+
+            window.addEventListener('load', run);
+        </script>
+    </body>
+</html>
