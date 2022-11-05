@@ -6,18 +6,38 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600;1,700;1,900&display=swap" rel="stylesheet">
         <style>
+            svg {
+                width: 400px;
+                height: 400px;    
+                transform: rotate(-90deg);
+                overflow: initial;
+            } 
+            
+            circle {
+                fill: none;
+                stroke: black;
+                stroke-width: 20px;
+                stroke-dasharray: 1570;
+                stroke-dashoffset: 0;
+            }
+
+            .circle_box > div {
+                position: relative;
+            }
+
+            .circle_box #content {
+                position: absolute;
+                left: 50%;
+                top:50%;
+                transform: translate(-50%,-50%);
+                font-size: 40px;
+            }
+        </style>
+        <style>
             body { 
                 margin: 0; 
                 font-family: 'Source Sans Pro', sans-serif;
                 font-size: 40px;
-            }
-            h3 {
-                font-weight: 400;
-            }
-            h1 {
-                font-weight: 900;
-            }
-            main { 
                 width: 100vw; 
                 height: 100vh;
                 display: flex;
@@ -25,15 +45,33 @@
                 justify-content: center;
                 align-items: center;
             }
+            h3 {
+                font-weight: 400;
+            }
+            h1 {
+                font-weight: 900;
+            }
+            #content {
+                width: 100%;
+                text-align: center;
+            }
         </style>
     </head>
     <body>
-        <main>
-            <h3>[DEFAULT TITLE]</h3>
-            <h1>[DEFAULT TIMER]</h1>
+        <main class="circle_box">
+            <div>
+                <svg>
+                    <circle cx="200" cy="200" r="250" stroke-linecap="round"/>
+                </svg>
+                <div id="content"> 
+                    <h3>[DEFAULT TITLE]</h3>
+                    <h1>[DEFAULT TIMER]</h1>
+                </div>
+
+            </div>
         </main>
         <script>
-
+            const DASHOFFSET = 1570;
             const formatMilliseconds = (milliseconds) => {
                 const seconds = Math.floor((milliseconds / 1000) % 60);
                 const minutes = Math.floor(((milliseconds / (1000*60)) % 60));
@@ -45,10 +83,14 @@
 
             let durationInMilliseconds;
             let countDownElement;
+            let cirlcePercentageElement;
+
             const countDown = (elapsed) => {
                 if(Math.round(elapsed) % 2 === 0) {
                     const currentCountDown = durationInMilliseconds - elapsed;
-                    if(currentCountDown < 0) {
+                    const percentage = elapsed/durationInMilliseconds;
+                    cirlcePercentageElement.style.strokeDashoffset = percentage * DASHOFFSET;
+                    if(percentage >= 1) {
                         return;
                     }
                     countDownElement.textContent = formatMilliseconds(currentCountDown);
@@ -68,8 +110,9 @@
             }
 
             const run = () => {
-                countDownElement = document.querySelector('main > h1');
-                const titleElement = document.querySelector('main > h3');
+                countDownElement = document.querySelector('main h1');
+                cirlcePercentageElement = document.querySelector('.circle_box circle');
+                const titleElement = document.querySelector('main h3');
                 const duration = getCountDownDurationInSeconds(location.href);
                 const title = getTitle(location.href);
                 if(typeof duration !== 'number') {
